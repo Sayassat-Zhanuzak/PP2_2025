@@ -3,6 +3,7 @@ y = "sweet" #string
 z = 't'     #also string
 u = 5.0
 t = 5j      #complex
+
 print(type(x))
 print(type(y))
 print(type(z))
