@@ -3,4 +3,3 @@ def ounce_to_gram(a):
 ounce_to_gram(45.34)
 a = float(input())
 ounce_to_gram(a)
-
