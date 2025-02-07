@@ -17,4 +17,6 @@ def solve(numheads, numlegs):
     print("Number of chickens: " + str(chicken))
     print("Number of rabbits " + str(rabbit))
 
-solve(35, 94)
+head = int(input("Number of heads: "))
+leg = int(input("Number of legs: "))
+solve(head, leg)
