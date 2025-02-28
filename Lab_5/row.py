@@ -1,155 +1,36 @@
 import re
 import csv
 
-text = '''ДУБЛИКАТ
-Филиал ТОО EUROPHARMA Астана
-БИН 080841000761
-НДС Серия 58001
-№ 0014377
-Касса 300-189
-Смена 10
-Порядковый номер чека №64
-Чек №2331180266
-Кассир Аптека 17-1
-ПРОДАЖА
-1.
-Натрия хлорид 0,9%, 200 мл, фл
-2,000 x 154,00
-308,00
-Стоимость
-308,00
-2.
-Борный спирт 3%, 20 мл, фл.
-1,000 x 51,00
-51,00
-Стоимость
-51,00
-3.
-Шприц 2 мл, 3-х комп. (Bioject)
-2,000 x 16,00
-32,00
-Стоимость
-32,00
-4.
-Система для инфузии Vogt Medical
-2,000 x 60,00
-120,00
-Стоимость
-120,00
-5.
-Naturella прокладки Классик макси №8
-1,000 x 310,00
-310,00
-Стоимость
-310,00
-6.
-AURA Ватные диски №150
-1,000 x 461,00
-461,00
-Стоимость
-461,00
-7.
-Чистая линия скраб мягкий 50 мл
-1,000 x 381,00
-381,00
-Стоимость
-381,00
-8.
-Чистая линия  скраб очищающийабрикос 50 мл
-1,000 x 386,00
-386,00
-Стоимость
-386,00
-9.
-Чистая линия скраб мягкий 50 мл
-1,000 x 381,00
-381,00
-Стоимость
-381,00
-10.
-Carefree салфетки Алоэвоздухопроницаемые №20
-1,000 x 414,00
-414,00
-Стоимость
-414,00
-11.
-Pro Series Шампунь яркий цвет 500мл
-1,000 x 841,00
-841,00
-Стоимость
-841,00
-12.
-Pro Series бальзам-ополаскивательдля длител ухода за окрашеннымиволосами Яркий цвет 500мл
-1,000 x 841,00
-841,00
-Стоимость
-841,00
-13.
-Clear шампунь Актив спорт 2в1мужской  400 мл
-1,000 x 1 200,00
-1 200,00
-Стоимость
-1 200,00
-14.
-Bio World (HYDRO THERAPY)Мицеллярная вода 5в1, 445мл
-1,000 x 1 152,00
-1 152,00
-Стоимость
-1 152,00
-15.
-Bio World (HYDRO THERAPY) Гель-муссдля умывания с гиалуроновойкислотой, 250мл
-1,000 x 1 152,00
-1 152,00
-Стоимость
-1 152,00
-16.
-[RX]-Натрия хлорид 0,9%, 100 мл, фл.
-1,000 x 168,00
-168,00
-Стоимость
-168,00
-17.
-[RX]-Дисоль р-р 400 мл, фл.
-1,000 x 163,00
-163,00
-Стоимость
-163,00
-18.
-Тагансорбент с иономи серебра №30,пор.
-1,000 x 1 526,00
-1 526,00
-Стоимость
-1 526,00
-19.
-[RX]-Церукал 2%, 2 мл, №10, амп.
-2,000 x 396,00
-792,00
-Стоимость
-792,00
-20.
-[RX]-Андазол 200 мг, №40, табл.
-1,000 x 7 330,00
-7 330,00
-Стоимость
-7 330,00'''
+with open("raw.txt", "r", encoding="utf-8") as f:
+    text = f.read()
 
-pattern = re.compile(r'(\d+\.)\n(.*?)\n(\d{1,3}(?: \d{3})*,\d{2}) x (\d{1,3}(?: \d{3})*,\d{2})\n(\d{1,3}(?: \d{3})*,\d{2})')
+BINPattern = r"\nБИН\s(?P<BIN>[0-9]+)"
+BINResult = re.search(BINPattern, text).group("BIN")
+print(BINResult)
 
-matches = pattern.findall(text)
+CheckPattern = r"\nЧек\s(?P<Check>№[0-9]+)"
+CheckResult = re.search(CheckPattern, text).group("Check")
+print(CheckResult)
 
-with open("receipt.csv", "w", newline="", encoding="utf-8") as csvfile:
-    fieldnames = ["Order", "Product", "Quantity", "Unit Price", "Total Price"]
+ItemPattern = r"(?P<ItemRowNumber>\d+\.)\n(?P<ItemName>.*?)\n(?P<ItemsCount>.*?)\s*x\s*(?P<ItemPrice>.*?)\n(?P<TotalItemPrice1>.*?)\nСтоимость\n(?P<TotalItemPrice2>.*?)(?=\n\d+\.|\Z)"
+prog = re.compile(ItemPattern, re.S)
+items = prog.finditer(text)
+
+with open('data.csv', 'w', newline='', encoding="utf8") as csvfile:
+    fieldnames = ['ItemRowNumber', 'ItemName', 'ItemsCount', 'ItemPrice', 'TotalItemPrice1', 'TotalItemPrice2']
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-
     writer.writeheader()
-    for match in matches:
-        order, product, quantity, unit_price, total_price = match
+    for item in items:
         writer.writerow({
-            "Order": order.strip(),
-            "Product": product.strip(),
-            "Quantity": quantity.strip(),
-            "Unit Price": unit_price.strip(),
-            "Total Price": total_price.strip()
+            "ItemRowNumber": item.group("ItemRowNumber").strip(),
+            "ItemName": item.group("ItemName").strip(),
+            "ItemsCount": item.group("ItemsCount").strip(),
+            "ItemPrice": item.group("ItemPrice").strip(),
+            "TotalItemPrice1": item.group("TotalItemPrice1").strip(),
+            "TotalItemPrice2": item.group("TotalItemPrice2").strip()
         })
 
-print("CSV file 'receipt.csv' created successfully!")
+print("CSV file 'data.csv' created successfully!")
+
+for item in prog.finditer(text):
+    print(item.group("ItemRowNumber"), item.group("ItemName"))
