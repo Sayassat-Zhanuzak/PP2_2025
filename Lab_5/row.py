@@ -4,7 +4,7 @@ import csv
 with open("raw.txt", "r", encoding="utf-8") as f:
     text = f.read()
 
-ItemPattern = r"(?P<ItemRowNumber>\d+\.)\n(?P<ItemName>.*?)\n(?P<ItemsCount>.*?)\s*x\s*(?P<ItemPrice>.*?)\n(?P<TotalItemPrice1>.*?)\nСтоимость\n(?P<TotalItemPrice2>.*?)(?=\n\d+\.|\Z)"
+ItemPattern = r"(?P<ItemRowNumber>\d+\.)\n(?P<ItemName>.*?)\n(?P<ItemsCount>.*?)\s*x\s*(?P<ItemPrice>.*?)\n(?P<TotalItemPrice1>.*?)\nСтоимость\n(?P<TotalItemPrice2>.*?)(?=\n\d+\.|\nБанковская карта:|\Z)"
 prog = re.compile(ItemPattern, re.S)
 items = prog.finditer(text)
 
